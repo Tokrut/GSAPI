@@ -1,0 +1,16 @@
+streamlit
+beautifulsoup4
+requests
+lxml
+urllib3
+python-docx
+textstat
+numpy
+bcrypt
+psutil
+plotly
+selenium
+webdriver-manager
+Pillow
+openai
+pandas
