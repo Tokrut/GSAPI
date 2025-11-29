@@ -1,0 +1,25 @@
+geo-analyzer/
+├── config.py
+├── analyzer/
+│   ├── __init__.py
+│   ├── base_analyzer.py
+│   └── enhanced_analyzer.py
+├── report/
+│   ├── __init__.py
+│   ├── generators.py
+│   └── formatters.py
+├── ui/
+│   ├── __init__.py
+│   ├── components.py
+│   ├── layouts.py
+│   ├── sidebar_components.py
+│   ├── comparsion_components.py
+│   └── auth_components.py
+├── auth/
+│   ├── __init__.py
+│   ├── models.py
+│   └── service.py
+├── utils/
+│   ├── __init__.py
+│   └── helpers.py
+└── app.py
