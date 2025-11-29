@@ -123,14 +123,21 @@ def display_recent_activity():
                 st.markdown("---")
 
 def display_quick_actions():
-    """Быстрые действия"""
-    st.markdown("### ⚡ Быстрые действия")
+    """Красивая панель быстрых действий с улучшенным дизайном"""
     
-    col1, col2, col3 = st.columns(3)
+    # Заголовок панели с иконкой
+    st.markdown("""
+    <div class="quick-action-panel fade-in-up">
+        <div class="quick-actions-title">⚡ Быстрые действия</div>
+        <div class="action-grid">
+    """, unsafe_allow_html=True)
     
-    with col1:
-        if st.button("Главное меню", width='stretch', key="main_menu_sidebar"):
-            # Сбрасываем состояние приложения к главному меню
+    # Создаем контейнер для кнопок в сетке 2x2
+    cols = st.columns(2)
+    
+    # Кнопка "Главное меню"
+    with cols[0]:
+        if st.button("🏠\nГлавное меню", key="main_menu_sidebar", help="Вернуться к главному экрану", use_container_width=True):
             st.session_state.current_analysis = None
             st.session_state.show_comparison = False
             st.session_state.show_profile = False
@@ -138,35 +145,135 @@ def display_quick_actions():
             st.session_state.show_sample = False
             st.rerun()
         
-        if st.button("Новый анализ", width='stretch', key="new_analysis_sidebar"):
+    # Кнопка "Новый анализ"
+    with cols[1]:
+        if st.button("🔍\nНовый анализ", key="new_analysis_sidebar", help="Запустить анализ нового сайта", use_container_width=True):
             st.session_state.current_analysis = None
             st.rerun()
     
-    with col2:
-        if st.button("Статистика", width='stretch', key="stats_sidebar"):
+    # Кнопка "Статистика"
+    with cols[0]:
+        if st.button("📊\nСтатистика", key="stats_sidebar", help="Посмотреть детальную статистику", use_container_width=True):
             st.session_state.show_stats = True
             st.rerun()
 
-        if st.button("Очистить историю", width='stretch', key="clear_history_sidebar"):
-            if st.session_state.user:
-                from app import main
-                # Используем глобальный auth_service через st.session_state
-                auth_service = st.session_state.get('auth_service')
-                if auth_service:
-                    success = auth_service.clear_user_analysis_history(st.session_state.user.username)
-                    if success:
-                        st.session_state.analysis_history = []
-                        st.success("История очищена!")
-                        st.rerun()
+    # Кнопка "Пример отчета"
+    with cols[1]:
+        if st.button("📄\nПример отчета", key="sample_report_sidebar", help="Посмотреть пример анализа", use_container_width=True):
+            st.session_state.show_sample = True
+            st.rerun()
+
+    # Закрываем сетку основных кнопок
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Добавляем разделитель
+    st.markdown("---")
+    
+    # Кнопка "Очистить историю" (на всю ширину) с улучшенным стилем
+    if st.button("🗑️\nОчистить историю анализов", key="clear_history_sidebar", help="Удалить всю историю анализов", use_container_width=True):
+        # Создаем модальное окно подтверждения
+        st.markdown("""
+        <div class="confirmation-modal">
+            <h4 style="color: #d32f2f; text-align: center; margin-bottom: 15px;">⚠️ Подтвердите действие</h4>
+            <p style="text-align: center; margin-bottom: 20px;">Вы уверены, что хотите удалить всю историю анализов? Это действие нельзя отменить.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("✅ Да, очистить", key="confirm_clear_history", type="primary", use_container_width=True):
+                try:
+                    if st.session_state.user:
+                        from auth.service import AuthService
+                        auth_service = AuthService()
+                        success = auth_service.clear_user_analysis_history(st.session_state.user.username)
+                        if success:
+                            st.session_state.analysis_history = []
+                            st.success("✅ История очищена успешно!")
+                        else:
+                            st.error("❌ Ошибка при очистке истории")
                     else:
-                        st.error("Ошибка при очистке истории")
-            else:
+                        st.session_state.analysis_history = []
+                        st.success("✅ История очищена успешно!")
+                    
+                    # Небольшая задержка для показа сообщения
+                    import time
+                    time.sleep(1.5)
+                    st.rerun()
+                    
+                except Exception as e:
+                    st.error(f"❌ Произошла ошибка: {str(e)}")
+        
+        with col2:
+            if st.button("❌ Отменить", key="cancel_clear_history", use_container_width=True):
+                st.rerun()
+    
+    # Закрываем панель
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Добавляем информационную подсказку
+    with st.expander("💡 Подсказки по использованию", expanded=False):
+        st.info("""
+        **Полезные советы:**
+        
+        🏠 **Главное меню** - возврат к основному экрану анализа
+        
+        🔍 **Новый анализ** - быстрый запуск анализа другого сайта
+        
+        📊 **Статистика** - детальная аналитика ваших анализов
+        
+        📄 **Пример отчета** - посмотрите, как выглядит полный отчет
+        
+        🗑️ **Очистить историю** - удаление всех сохраненных анализов
+        """)
+
+
+def display_quick_actions_compact():
+    """Компактная версия панели быстрых действий для мобильных устройств"""
+    
+    st.markdown("### ⚡ Действия")
+    
+    # Горизонтальная компоновка кнопок
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("🏠 Главное", key="main_menu_compact"):
+            st.session_state.current_analysis = None
+            st.session_state.show_comparison = False
+            st.session_state.show_profile = False
+            st.session_state.show_stats = False
+            st.session_state.show_sample = False
+            st.rerun()
+        
+        if st.button("📊 Статистика", key="stats_compact"):
+            st.session_state.show_stats = True
+            st.rerun()
+    
+    with col2:
+        if st.button("🔍 Новый", key="new_analysis_compact"):
+            st.session_state.current_analysis = None
+            st.rerun()
+        
+        if st.button("📄 Пример", key="sample_compact"):
+            st.session_state.show_sample = True
+            st.rerun()
+    
+    # Кнопка очистки в отдельной строке
+    if st.button("🗑️ Очистить историю", key="clear_compact", type="secondary"):
+        if st.session_state.user:
+            from auth.service import AuthService
+            auth_service = AuthService()
+            success = auth_service.clear_user_analysis_history(st.session_state.user.username)
+            if success:
                 st.session_state.analysis_history = []
                 st.success("История очищена!")
                 st.rerun()
-        
-        if st.button("Пример отчета", width='stretch', key="sample_report_sidebar"):
-            st.session_state.show_sample = True
+            else:
+                st.error("Ошибка при очистке истории")
+        else:
+            st.session_state.analysis_history = []
+            st.success("История очищена!")
             st.rerun()
 
 def display_system_status(login_time):
